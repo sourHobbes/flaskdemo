@@ -1,0 +1,128 @@
+<html>
+<body>
+<link rel="stylesheet"
+      type="text/css"
+      href="/static/login.css"/>
+<!--
+<div style="width: 100%; overflow: hidden;">
+    <div style="width: 600px; float: left;"> Left </div>
+    <div style="margin-left: 620px;"> Right </div>
+</div>
+-->
+<div style="width: 100%; overflow: hidden;" class="container">
+<div style="width: 600px; float: left;">
+  <h1>Flask React</h1>
+  <br>
+  <div id="content"></div>
+
+<script src="http://cdnjs.cloudflare.com/ajax/libs/react/0.12.0/react.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/react/0.12.0/JSXTransformer.js"></script>
+
+<!--
+<script type="text/jsx">
+
+  /*** @jsx React.DOM */
+
+  var realPython = React.createClass({
+    render: function() {
+      return (<h2>Greetings, from Real Python!</h2>)
+    }
+  });
+
+  React.render(
+    React.createElement(realPython, null),
+    document.getElementById('content')
+  );
+
+</script>
+-->
+
+<script>
+var request = new XMLHttpRequest()
+var token = ""
+request.open('GET', '/', true)
+request.send()
+function  make_post (token) {
+    var request = new XMLHttpRequest()
+    request.open('GET', '/', true)
+    request.send()
+    var params = "csrf_token="+token+"&user_name=admin&pswd=secret&login=LogIn"
+    request.open('POST', 'logon', true);
+    request.setRequestHeader("Content-type", "application/x-www-form-urlencoded")
+
+    request.onreadystatechange = (e) => {
+      if (request.readyState !== 4) {
+        return;
+      }
+
+      if (request.status === 200) {
+        console.log('success', request.responseText);
+      } else {
+        console.warn('error');
+      }
+    };
+    request.send(params);
+}
+function print_cb(token) {
+    var local_token = token
+    function get_token() {
+        return token
+    }
+    return get_token
+}
+
+request.onload =
+    function getListener () {
+      var el = document.createElement('div');
+      el.innerHTML = this.responseText;
+      token = el.querySelector('input[name="csrf_token"]').value
+      print_cb(token)
+      make_post(token)
+      console.log("The token is\n" + el.querySelector('input[name="csrf_token"]').value)
+  };
+//request.callback = make_post;
+console.log("Value of token outside is\n" + token)
+//make_post(token)
+
+</script>
+
+<script type="text/jsx" src="/static/jsx/main.js"></script>
+</div>
+<div style="margin-left: 620px;">
+<title>LogIn</title>
+<p>LogIn</p>
+<form method="POST" action="/logon">
+    {{login.csrf_token()}}
+    {{login.user_name.label}} {{login.user_name(size=90)}}
+    <br/>
+    {{login.pswd.label}} {{login.pswd(size=90)}}
+    <br/>
+    <strong>{{ login.login }}</strong>
+    {% if error %}
+    <strong>{{ error.msg }}</strong>
+    {% endif %}
+    <br/>
+    <br/>
+</form>
+
+<form method="POST" action="/sms2">
+    {% if sms %}
+    {{sms.sms_msg.label}} {{sms.sms_msg(size=150)}}
+    {% endif %}
+    <br/>
+    {% if sms %}
+    {{sms.sms_no.label}} {{sms.sms_no(size=15)}}
+    {% endif %}
+    <br/>
+    <br/>
+    {% if sms %}
+    <strong> {{ sms.sms}} </strong>
+    {% endif %}
+    <br/>
+    <br/>
+</form>
+
+</div>
+</div>
+</body>
+</html>
