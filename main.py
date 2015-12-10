@@ -6,6 +6,8 @@ from flask import Flask, redirect, url_for, request, make_response, session
 from flask.ext.sqlalchemy import SQLAlchemy
 import time
 import twilio.twiml
+import sqlite3 
+from sqlite3 import dbapi2 as sqlite
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
