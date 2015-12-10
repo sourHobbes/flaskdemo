@@ -160,3 +160,9 @@ def root():
     sms = SmsForm()
     return render_template('login.html', login=login, sms=sms)
     # return render_template('index.html', form=form, lunches=lunchs)
+
+if __name__ == "__main__":
+    db.create_all()
+    create_admin_user()
+    app.debug = True
+    app.run(port=80)
