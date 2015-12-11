@@ -2,17 +2,18 @@ import sys
 import os
 sys.path.insert(1, os.path.join(os.path.abspath('.'), 'lib'))
 
-from flask import Flask, redirect, url_for, request, make_response, session
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask import Flask, url_for, request, make_response, session
+#from flask.ext.sqlalchemy import SQLAlchemy
 import time
 import twilio.twiml
-import sqlite3 
-from sqlite3 import dbapi2 as sqlite
+from google.appengine.ext import ndb
+#import sqlite3 
+#from sqlite3 import dbapi2 as sqlite
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 
-db = SQLAlchemy(app)
+#db = SQLAlchemy(app)
 
 @app.route(u'/new', methods=[u'POST'])
 def new_lunch():
@@ -42,13 +43,13 @@ def create_admin_user(user="admin", password="secret"):
     db.session.add(user)
     db.session.commit()
 
-class Lunch(db.Model):
+class Lunch(ndb.Model):
     id = db.Column(db.Integer, primary_key=True)
     submitter = db.Column(db.String(63))
     food = db.Column(db.String(255))
 
 
-class User(db.Model):
+class User(ndb.Model):
     id = db.Column(db.Integer, primary_key=True)
     user = db.Column(db.String(100))
     pswd = db.Column(db.String(100))
@@ -160,9 +161,10 @@ def root():
     sms = SmsForm()
     return render_template('login.html', login=login, sms=sms)
     # return render_template('index.html', form=form, lunches=lunchs)
-
+'''
 if __name__ == "__main__":
     db.create_all()
     create_admin_user()
     app.debug = True
     app.run(port=80)
+'''
