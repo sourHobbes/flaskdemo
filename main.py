@@ -15,26 +15,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 
 #db = SQLAlchemy(app)
 
-@app.route(u'/new', methods=[u'POST'])
-def new_lunch():
-    cookie = request.cookies.get('user_name')
-    try:
-        IsValid(cookie)
-    except AttributeError, ex:
-        login = LoginForm()
-        error = Error(ex.message)
-        return render_template('login.html', login=login, error=error)
-
-    form = LunchForm()
-    if form.validate_on_submit():
-        lunch = Lunch()
-        if form.food.data == "" or form.submitter.data == "":
-            return redirect(url_for('root'))
-        form.populate_obj(lunch)
-        db.session.add(lunch)
-        db.session.commit()
-    return render_lunches_page()
-
 
 def create_admin_user(user="admin", password="secret"):
     if User.query.filter_by(user=user).count() > 0:
@@ -44,17 +24,28 @@ def create_admin_user(user="admin", password="secret"):
     db.session.commit()
 
 class Lunch(ndb.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    submitter = db.Column(db.String(63))
-    food = db.Column(db.String(255))
+    id = ndb.IntegerProperty()
+    submitter = ndb.StringProperty()
+    food = ndb.StringProperty()
 
 
 class User(ndb.Model):
+
+    '''
     id = db.Column(db.Integer, primary_key=True)
     user = db.Column(db.String(100))
     pswd = db.Column(db.String(100))
+    '''
+    id = ndb.IntegerProperty()
+    user = ndb.StringProperty()
+    pswd = ndb.StringProperty()
+
+    @classmethod
+    def _query(cls, ancestor_key):
+        return cls.query(ancestor=ancestor_key)
 
     def __init__(self, user="", pswd=""):
+        super.__init__()
         self.user = user
         self.pswd = pswd
 
@@ -127,7 +118,8 @@ def logon():
     form = LoginForm()
 
     if form.validate_on_submit():
-        user = User.query.filter_by(user=form.user_name.data).all()
+        ancestory_key = ndb.Key("name", form.user_name.data or "guest")
+        user = User.query(ancestory_key)
         try:
             if not user or len(user) <= 0 or len(user) > 1 and not cookie:
                 raise AttributeError("Invalid user name."
