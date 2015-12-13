@@ -1,8 +1,11 @@
 import sys
 import os
-sys.path.insert(1, os.path.join(os.path.abspath('.'), 'lib'))
 
-from flask import Flask, url_for, request, make_response, session
+from google.appengine.ext.db import BadRequestError
+
+sys.path.insert(1, os.path.join(os.path.abspath('.'), 'lib'))
+import pdb
+from flask import Flask, redirect, url_for, request, make_response, session
 #from flask.ext.sqlalchemy import SQLAlchemy
 import time
 import twilio.twiml
@@ -100,7 +103,7 @@ class IsValid:
 
 
 def render_lunches_page(set_cookie=False):
-    lunchs = Lunch.query.all()
+    lunchs = Lunch.query()
     lform = LunchForm()
     resp = make_response(render_template('index.html', form=lform, lunches=lunchs))
     resp.set_cookie('user_name', str(time.time()))
@@ -112,13 +115,14 @@ def logon():
     form = LoginForm()
 
     if form.validate_on_submit():
-        user_key = ndb.Key("User", form.user_name.data)
-        user = ndb.get(user_key)
+        user_key = ndb.Key("User", form.user_name.data or 'admin')
+        user = None
         try:
-            if not user or len(user) <= 0 or len(user) > 1 and not cookie:
+            user = user_key.get()
+            if not user:
                 raise AttributeError("Invalid user name."
                                      " Such a user does not exist or the password is incorrect")
-            if user[0].pswd == form.pswd.data:
+            if user.pswd == form.pswd.data:
                 return render_lunches_page(set_cookie=True)
             else:
                 raise AttributeError("Invalid user name."
@@ -126,6 +130,10 @@ def logon():
         except AttributeError, ex:
             login = LoginForm()
             error = Error(ex.message)
+            return render_template('login.html', login=login, error=error)
+        except BadRequestError, ex:
+            login = LoginForm()
+            error = Error("Please specify a valid user name")
             return render_template('login.html', login=login, error=error)
     else:
         login = LoginForm()
@@ -141,16 +149,38 @@ def hello_monkey():
     resp.message("Hello, Mobile Monkey")
     return str(resp)
 
+@app.route(u'/new', methods=[u'POST'])
+def new_lunch():
+    cookie = request.cookies.get('user_name')
+    try:
+        IsValid(cookie)
+    except AttributeError, ex:
+        login = LoginForm()
+        error = Error(ex.message)
+        return render_template('login.html', login=login, error=error)
+
+    form = LunchForm()
+    if form.validate_on_submit():
+        lunch = Lunch()
+        if form.food.data == "" or form.submitter.data == "":
+            return render_lunches_page(set_cookie=True)
+        import pdb
+        pdb.set_trace()
+        lunch = Lunch(submitter=form.submitter.data, food=form.food.data)
+        lunch.put()
+    return render_lunches_page()
+
 @app.route("/")
 def root():
+    #ndb.delete_multi(Lunch.query().fetch(keys_only=True))
     create_admin_user()
     login = LoginForm()
     sms = SmsForm()
     return render_template('login.html', login=login, sms=sms)
     # return render_template('index.html', form=form, lunches=lunchs)
-
+'''
 if __name__ == "__main__":
     create_admin_user()
     app.debug = True
     app.run(port=80)
-
+'''
