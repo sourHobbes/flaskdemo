@@ -4,7 +4,7 @@ import os
 from google.appengine.ext.db import BadRequestError
 
 sys.path.insert(1, os.path.join(os.path.abspath('.'), 'lib'))
-from flask import Flask, redirect, url_for, request, make_response, session
+from flask import Flask, redirect, url_for, request, make_response, session, jsonify
 #from flask.ext.sqlalchemy import SQLAlchemy
 import time
 import twilio.twiml
@@ -166,6 +166,20 @@ def new_lunch():
         lunch = Lunch(submitter=form.submitter.data, food=form.food.data)
         lunch.put()
     return render_lunches_page()
+
+
+@app.route(u'/lunches', methods=[u'GET'])
+def get_lunches():
+    cookie = request.cookies.get('user_name')
+    try:
+        IsValid(cookie)
+    except AttributeError, ex:
+        login = LoginForm()
+        error = Error(ex.message)
+        return render_template('login.html', login=login, error=error)
+    import json
+    res = json.dumps([p.to_dict() for p in Lunch.query().fetch()])
+    return res
 
 @app.route("/")
 def root():
