@@ -43,11 +43,6 @@ class User(ndb.Model):
     def _query(cls, ancestor_key):
         return cls.query(ancestor=ancestor_key)
 
-    def __init__(self, user="", pswd=""):
-        super.__init__()
-        self.user = user
-        self.pswd = pswd
-
 
 from flask.ext.wtf import Form
 from wtforms.fields import StringField, SubmitField
