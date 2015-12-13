@@ -4,7 +4,6 @@ import os
 from google.appengine.ext.db import BadRequestError
 
 sys.path.insert(1, os.path.join(os.path.abspath('.'), 'lib'))
-import pdb
 from flask import Flask, redirect, url_for, request, make_response, session
 #from flask.ext.sqlalchemy import SQLAlchemy
 import time
@@ -164,8 +163,6 @@ def new_lunch():
         lunch = Lunch()
         if form.food.data == "" or form.submitter.data == "":
             return render_lunches_page(set_cookie=True)
-        import pdb
-        pdb.set_trace()
         lunch = Lunch(submitter=form.submitter.data, food=form.food.data)
         lunch.put()
     return render_lunches_page()
