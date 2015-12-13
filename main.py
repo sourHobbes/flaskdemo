@@ -17,14 +17,14 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 
 
 def create_admin_user(user="admin", password="secret"):
-    if User.query.filter_by(user=user).count() > 0:
-        User.query.filter_by(user=user).delete()
-    user = User(user, password)
-    db.session.add(user)
-    db.session.commit()
+    admin_user_key = ndb.Key("User", "admin")
+    admin_user = admin_user_key.get()
+    if not admin_user:
+        user = User(user=user, pswd='secret', id=user)
+        user.put()
+
 
 class Lunch(ndb.Model):
-    id = ndb.IntegerProperty()
     submitter = ndb.StringProperty()
     food = ndb.StringProperty()
 
@@ -36,7 +36,6 @@ class User(ndb.Model):
     user = db.Column(db.String(100))
     pswd = db.Column(db.String(100))
     '''
-    id = ndb.IntegerProperty()
     user = ndb.StringProperty()
     pswd = ndb.StringProperty()
 
@@ -118,8 +117,8 @@ def logon():
     form = LoginForm()
 
     if form.validate_on_submit():
-        ancestory_key = ndb.Key("name", form.user_name.data or "guest")
-        user = User.query(ancestory_key)
+        user_key = ndb.Key("User", form.user_name.data)
+        user = ndb.get(user_key)
         try:
             if not user or len(user) <= 0 or len(user) > 1 and not cookie:
                 raise AttributeError("Invalid user name."
@@ -149,14 +148,14 @@ def hello_monkey():
 
 @app.route("/")
 def root():
+    create_admin_user()
     login = LoginForm()
     sms = SmsForm()
     return render_template('login.html', login=login, sms=sms)
     # return render_template('index.html', form=form, lunches=lunchs)
-'''
+
 if __name__ == "__main__":
-    db.create_all()
     create_admin_user()
     app.debug = True
     app.run(port=80)
-'''
+
