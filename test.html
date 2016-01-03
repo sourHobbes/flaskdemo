@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Example of Bootstrap 3 Nested Rows and Columns</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<style type="text/css">
+    /* Some custom styles to beautify this example */
+    .main-content{
+        min-height: 330px;
+        background: #dbdfe5;
+    }
+    .sidebar-content{
+        min-height: 150px;
+        margin-bottom: 30px;
+        background: #b4bac0;
+    }
+</style>
+</head>
+<body>
+    <!-- Open the output in a new blank tab (Click the arrow next to "Show Output" button) and resize the browser window to understand how the Bootstrap responsive grid system works. -->
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-8">
+                <div class="main-content"></div>
+            </div>
+            <div class="col-xs-4">
+                <!--Nested rows within a column-->
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="sidebar-content"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="sidebar-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>                                     

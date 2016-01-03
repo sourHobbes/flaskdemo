@@ -4,18 +4,12 @@ import os
 from google.appengine.ext.db import BadRequestError
 
 sys.path.insert(1, os.path.join(os.path.abspath('.'), 'lib'))
-from flask import Flask, redirect, url_for, request, make_response, session, jsonify
-#from flask.ext.sqlalchemy import SQLAlchemy
+from flask import Flask, request, make_response
 import time
 import twilio.twiml
 from google.appengine.ext import ndb
-#import sqlite3 
-#from sqlite3 import dbapi2 as sqlite
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
-
-#db = SQLAlchemy(app)
 
 
 def create_admin_user(user="admin", password="secret"):
@@ -140,6 +134,7 @@ def logon():
         error = Error("No inputs.")
         return render_template('login.html', login=login, sms=sms, error=error)
 
+
 @app.route(u"/sms", methods=[u'GET', u'POST'])
 def hello_monkey():
     """Respond to incoming calls with a simple text message."""
@@ -147,6 +142,7 @@ def hello_monkey():
     resp = twilio.twiml.Response()
     resp.message("Hello, Mobile Monkey")
     return str(resp)
+
 
 @app.route(u'/new', methods=[u'POST'])
 def new_lunch():
@@ -160,7 +156,6 @@ def new_lunch():
 
     form = LunchForm()
     if form.validate_on_submit():
-        lunch = Lunch()
         if form.food.data == "" or form.submitter.data == "":
             return render_lunches_page(set_cookie=True)
         lunch = Lunch(submitter=form.submitter.data, food=form.food.data)
@@ -181,8 +176,10 @@ def get_lunches():
     res = json.dumps([p.to_dict() for p in Lunch.query().fetch()])
     return res
 
+
 @app.route("/")
 def root():
+    #Uncomment this line to empty data base
     #ndb.delete_multi(Lunch.query().fetch(keys_only=True))
     create_admin_user()
     login = LoginForm()
